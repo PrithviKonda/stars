@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#070b1a">
+  <meta name="description" content="Hold your phone up to the sky to see which stars, planets and constellations are in front of you.">
+  <title>Stars</title>
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="pre-start">
+  <video id="camera" playsinline muted hidden></video>
+  <canvas id="sky" tabindex="0" aria-label="Sky view. Drag or use the arrow keys to look around; tap a star for details."></canvas>
+
+  <header class="readout">
+    <span class="readout__wind" id="readout-wind">S</span>
+    <span class="readout__num" id="readout-az">180°</span>
+    <span class="readout__rule" aria-hidden="true"></span>
+    <span class="readout__num" id="readout-alt">35° up</span>
+  </header>
+
+  <p id="toast" class="toast" role="status" hidden></p>
+
+  <div id="guide" class="guide" hidden>
+    <span id="guide-text" role="status"></span>
+    <button id="guide-stop" type="button">Stop</button>
+  </div>
+
+  <section id="card" class="card" aria-live="polite" hidden>
+    <button class="card__close" id="card-close" type="button" aria-label="Close details">
+      <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </button>
+    <h2 class="card__title" id="card-title"></h2>
+    <p class="card__sub" id="card-sub"></p>
+    <dl class="card__facts">
+      <div><dt id="card-fact-label">Magnitude</dt><dd id="card-fact"></dd></div>
+      <div><dt>Height</dt><dd id="card-alt"></dd></div>
+      <div><dt>Direction</dt><dd id="card-az"></dd></div>
+    </dl>
+  </section>
+
+  <nav class="bar" aria-label="Sky tools">
+    <button id="btn-find" type="button">
+      <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M13 13l4.5 4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      Find
+    </button>
+    <button id="btn-settings" type="button">
+      <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M3 6h14M3 14h14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="7" cy="6" r="2.2" fill="#0d132a" stroke="currentColor" stroke-width="1.6"/><circle cx="13" cy="14" r="2.2" fill="#0d132a" stroke="currentColor" stroke-width="1.6"/></svg>
+      Settings
+    </button>
+    <button id="btn-night" type="button" aria-pressed="false">
+      <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M15.5 12.2A6.5 6.5 0 0 1 7.8 4.5a6.5 6.5 0 1 0 7.7 7.7z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+      Night
+    </button>
+  </nav>
+
+  <div class="scrim" id="scrim" hidden></div>
+
+  <div class="sheet" id="sheet-find" role="dialog" aria-modal="true" aria-labelledby="find-title" hidden>
+    <div class="sheet__head">
+      <h2 id="find-title">Find in the sky</h2>
+      <button class="sheet__close" type="button" data-close>Close</button>
+    </div>
+    <label class="visually-hidden" for="find-input">Search stars, planets and constellations</label>
+    <input id="find-input" class="field" type="search" placeholder="Star, planet or constellation" autocomplete="off" autocapitalize="off" spellcheck="false">
+    <ul id="find-list" class="find-list"></ul>
+    <p id="find-empty" class="hint" hidden>Nothing by that name. Try a bright star like Vega, a planet, or a constellation like Orion.</p>
+  </div>
+
+  <div class="sheet" id="sheet-settings" role="dialog" aria-modal="true" aria-labelledby="settings-title" hidden>
+    <div class="sheet__head">
+      <h2 id="settings-title">Settings</h2>
+      <button class="sheet__close" type="button" data-close>Close</button>
+    </div>
+
+    <fieldset class="group">
+      <legend>Look around by</legend>
+      <div class="segmented">
+        <label><input type="radio" name="mode" id="mode-sensor" value="sensor"><span>Moving my phone</span></label>
+        <label><input type="radio" name="mode" id="mode-drag" value="drag" checked><span>Dragging</span></label>
+      </div>
+    </fieldset>
+
+    <fieldset class="group">
+      <legend>Show</legend>
+      <label class="check"><input type="checkbox" id="opt-lines" checked><span>Constellation lines</span></label>
+      <label class="check"><input type="checkbox" id="opt-names" checked><span>Names</span></label>
+      <label class="check"><input type="checkbox" id="opt-camera" checked><span>Camera behind the sky</span></label>
+    </fieldset>
+
+    <fieldset class="group">
+      <legend>Location</legend>
+      <p class="value" id="loc-text">Not set</p>
+      <button class="btn" id="loc-gps" type="button">Use my location</button>
+      <div class="loc-manual">
+        <div>
+          <label for="loc-lat">Latitude</label>
+          <input class="field" id="loc-lat" type="number" inputmode="decimal" min="-90" max="90" step="any" placeholder="37.77">
+        </div>
+        <div>
+          <label for="loc-lon">Longitude</label>
+          <input class="field" id="loc-lon" type="number" inputmode="decimal" min="-180" max="180" step="any" placeholder="-122.42">
+        </div>
+        <button class="btn" id="loc-set" type="button">Set</button>
+      </div>
+      <p class="hint" id="loc-hint">North and east are positive. A degree or so of error barely moves the stars.</p>
+    </fieldset>
+
+    <fieldset class="group">
+      <legend>Line up with the real sky</legend>
+      <label for="opt-fov">Camera field of view <output id="fov-out" for="opt-fov">62°</output></label>
+      <input id="opt-fov" type="range" min="40" max="95" step="1" value="62">
+      <p class="hint">If stars sit right at the centre but drift off toward the edges, change this until they match.</p>
+      <div class="row">
+        <span>Compass correction <output id="yaw-out">0°</output></span>
+        <button class="btn" id="yaw-reset" type="button">Reset</button>
+      </div>
+      <p class="hint" id="decl-hint">Drag the sky sideways until a star or the Moon sits on the real one.</p>
+    </fieldset>
+
+    <p class="credits">Star and constellation data from <a href="https://github.com/ofrohn/d3-celestial" target="_blank" rel="noopener">d3-celestial</a>, positions by <a href="https://github.com/cosinekitty/astronomy" target="_blank" rel="noopener">Astronomy Engine</a>, magnetic north from the World Magnetic Model.</p>
+  </div>
+
+  <div id="welcome" class="welcome">
+    <div class="welcome__panel">
+      <h1>Stars</h1>
+      <p class="welcome__lede">Hold your phone up to the sky to see which stars, planets and constellations are in front of you.</p>
+      <ul class="welcome__needs">
+        <li><strong>Camera</strong> shows the real sky behind the names.</li>
+        <li><strong>Motion and compass</strong> tell where you're pointing.</li>
+        <li><strong>Location</strong> works out which stars are above you. It stays on your phone.</li>
+      </ul>
+      <button id="start" class="btn btn--primary" type="button">Start</button>
+      <button id="start-drag" class="btn btn--quiet" type="button">Look around by dragging instead</button>
+    </div>
+  </div>
+
+  <div id="night-filter" aria-hidden="true"></div>
+
+  <script src="vendor/astronomy.browser.min.js"></script>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

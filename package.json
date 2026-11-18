@@ -1,0 +1,21 @@
+{
+  "name": "stars",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AR star finder for the phone browser: camera, compass and location in, labelled sky out.",
+  "type": "module",
+  "scripts": {
+    "start": "node tools/serve.mjs",
+    "test": "node --test test/*.test.mjs",
+    "test:e2e": "node test/e2e/run.mjs",
+    "build:data": "node tools/build-data.mjs"
+  },
+  "devDependencies": {
+    "@fontsource/instrument-sans": "^5.0.0",
+    "@fontsource/marcellus": "^5.0.0",
+    "astronomy-engine": "2.1.19",
+    "d3-celestial": "0.7.35",
+    "fast-check": "^3.23.0",
+    "geomagnetism": "0.2.0"
+  }
+}

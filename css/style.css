@@ -1,0 +1,277 @@
+/* Layout: one full-screen sky; instruments float over it. A heading readout
+   sits at the top, tools in a bar at the bottom, sheets rise from below. */
+
+@font-face {
+  font-family: "Marcellus";
+  src: url("../vendor/fonts/marcellus-400.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Instrument Sans";
+  src: url("../vendor/fonts/instrument-sans-400.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Instrument Sans";
+  src: url("../vendor/fonts/instrument-sans-600.woff2") format("woff2");
+  font-weight: 600;
+  font-display: swap;
+}
+
+:root {
+  color-scheme: dark;
+  --night: #070b1a;
+  --panel: rgba(13, 19, 42, 0.88);
+  --panel-solid: #0d132a;
+  --edge: rgba(146, 164, 255, 0.22);
+  --starlight: #e8ecff;
+  --dim: #9aa4d1;
+  --brass: #e5b567;
+  --brass-ink: #1b1403;
+  --display: Marcellus, "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  --ui: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --inset-top: env(safe-area-inset-top, 0px);
+  --inset-bottom: env(safe-area-inset-bottom, 0px);
+  --gutter: max(16px, env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px));
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+
+html, body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: var(--night);
+  color: var(--starlight);
+  font: 15px/1.45 var(--ui);
+  -webkit-text-size-adjust: 100%;
+  overscroll-behavior: none;
+}
+
+button, input, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--brass); outline-offset: 2px; }
+a { color: var(--brass); }
+
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip-path: inset(50%); white-space: nowrap;
+}
+
+#camera, #sky {
+  position: fixed; inset: 0; width: 100%; height: 100%;
+}
+#camera { object-fit: cover; background: var(--night); }
+#sky { touch-action: none; outline-offset: -4px; -webkit-user-select: none; user-select: none; }
+
+/* --- heading readout --------------------------------------------------- */
+.readout {
+  position: fixed; left: 50%; top: calc(var(--inset-top) + 12px);
+  transform: translateX(-50%);
+  display: flex; align-items: baseline; gap: 10px;
+  padding: 7px 16px 8px;
+  background: var(--panel);
+  border: 1px solid var(--edge);
+  border-radius: 999px;
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  white-space: nowrap;
+  pointer-events: none;
+}
+.readout__wind { font: 20px/1 var(--display); color: var(--brass); min-width: 1.6em; text-align: center; }
+.readout__num { font-variant-numeric: tabular-nums; font-weight: 600; }
+.readout__rule { align-self: stretch; width: 1px; background: var(--edge); }
+
+/* --- messages ---------------------------------------------------------- */
+.toast {
+  position: fixed; left: var(--gutter); right: var(--gutter);
+  top: calc(var(--inset-top) + 64px);
+  margin: 0 auto; max-width: 420px;
+  padding: 10px 14px;
+  background: var(--panel);
+  border: 1px solid var(--edge);
+  border-radius: 12px;
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  text-align: center;
+  text-wrap: balance;
+}
+
+/* --- bottom tools ------------------------------------------------------- */
+.bar {
+  position: fixed; left: 50%; bottom: calc(var(--inset-bottom) + 14px);
+  transform: translateX(-50%);
+  display: flex; gap: 2px; padding: 4px;
+  background: var(--panel);
+  border: 1px solid var(--edge);
+  border-radius: 999px;
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+}
+.bar button {
+  display: flex; align-items: center; gap: 7px;
+  min-height: 44px; padding: 0 16px;
+  background: none; border: 0; border-radius: 999px;
+  font-weight: 600;
+}
+.bar button[aria-pressed="true"] { background: var(--brass); color: var(--brass-ink); }
+.bar button[aria-pressed="true"] svg circle { fill: var(--brass); }
+
+.guide {
+  position: fixed; left: 50%; bottom: calc(var(--inset-bottom) + 78px);
+  transform: translateX(-50%);
+  display: flex; align-items: center; gap: 12px;
+  max-width: calc(100% - 2 * var(--gutter));
+  padding: 6px 6px 6px 16px;
+  background: var(--panel);
+  border: 1px solid var(--brass);
+  border-radius: 999px;
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+}
+.guide span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.guide button {
+  flex: none; min-height: 34px; padding: 0 14px;
+  background: rgba(229, 181, 103, 0.16); color: var(--brass);
+  border: 0; border-radius: 999px; font-weight: 600;
+}
+
+/* --- details card ------------------------------------------------------- */
+.card {
+  position: fixed; left: var(--gutter); right: var(--gutter);
+  bottom: calc(var(--inset-bottom) + 78px);
+  margin: 0 auto; max-width: 420px;
+  padding: 16px 18px 14px;
+  background: var(--panel);
+  border: 1px solid var(--edge);
+  border-radius: 18px;
+  -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+}
+/* Sit above the guide pill when both are showing. */
+.guide:not([hidden]) ~ .card { bottom: calc(var(--inset-bottom) + 134px); }
+.card__title { margin: 0 36px 2px 0; font: 26px/1.15 var(--display); letter-spacing: 0.01em; text-wrap: balance; }
+.card__sub { margin: 0 0 12px; color: var(--dim); }
+.card__facts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 0; padding-top: 12px; border-top: 1px solid var(--edge); }
+.card__facts dt { font-size: 11px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--dim); }
+.card__facts dd { margin: 2px 0 0; font-weight: 600; font-variant-numeric: tabular-nums; }
+.card__close {
+  position: absolute; top: 8px; right: 8px;
+  display: grid; place-items: center; width: 40px; height: 40px;
+  background: none; border: 0; border-radius: 50%; color: var(--dim);
+}
+
+/* --- sheets ------------------------------------------------------------- */
+.scrim { position: fixed; inset: 0; background: rgba(3, 5, 14, 0.5); }
+.sheet {
+  position: fixed; left: 0; right: 0; bottom: 0;
+  margin: 0 auto; max-width: 520px; max-height: min(82%, 720px);
+  display: flex; flex-direction: column; gap: 14px;
+  padding: 18px var(--gutter) calc(var(--inset-bottom) + 18px);
+  overflow-y: auto; overscroll-behavior: contain;
+  background: var(--panel-solid);
+  border: 1px solid var(--edge); border-bottom: 0;
+  border-radius: 22px 22px 0 0;
+  animation: rise 0.22s ease-out;
+}
+@keyframes rise { from { transform: translateY(24px); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .sheet { animation: none; } }
+.sheet__head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.sheet__head h2 { margin: 0; font: 24px/1.2 var(--display); }
+.sheet__close {
+  min-height: 40px; padding: 0 14px;
+  background: rgba(146, 164, 255, 0.12); border: 0; border-radius: 999px; font-weight: 600;
+}
+
+.field {
+  width: 100%; min-height: 46px; padding: 0 14px;
+  background: rgba(146, 164, 255, 0.08);
+  border: 1px solid var(--edge); border-radius: 12px;
+  font-size: 16px; /* keeps iOS from zooming the page on focus */
+}
+.field::placeholder { color: var(--dim); }
+
+.find-list { list-style: none; margin: 0; padding: 0; }
+.find-list button {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+  width: 100%; min-height: 52px; padding: 8px 4px;
+  background: none; border: 0; border-bottom: 1px solid var(--edge);
+  text-align: left;
+}
+.find-list .name { font-weight: 600; }
+.find-list .kind { display: block; font-size: 13px; color: var(--dim); font-weight: 400; }
+.find-list .where { flex: none; font-size: 13px; color: var(--brass); font-variant-numeric: tabular-nums; }
+.find-list .where.is-down { color: var(--dim); }
+
+.group { display: flex; flex-direction: column; gap: 10px; margin: 0; padding: 14px 0 0; border: 0; border-top: 1px solid var(--edge); min-width: 0; }
+.group legend { padding: 0; font-size: 11px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--dim); }
+.group .value { margin: 0; font-weight: 600; font-variant-numeric: tabular-nums; }
+.hint { margin: 0; font-size: 13px; color: var(--dim); }
+.row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+output { font-weight: 600; font-variant-numeric: tabular-nums; color: var(--brass); }
+
+.check { display: flex; align-items: center; gap: 12px; min-height: 40px; }
+.check input { width: 20px; height: 20px; accent-color: var(--brass); }
+input[type="range"] { width: 100%; accent-color: var(--brass); }
+
+.segmented { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; background: rgba(146, 164, 255, 0.08); border-radius: 14px; }
+.segmented label { position: relative; }
+.segmented input { position: absolute; inset: 0; opacity: 0; }
+.segmented span { display: grid; place-items: center; min-height: 42px; padding: 0 8px; border-radius: 10px; font-weight: 600; text-align: center; }
+.segmented input:checked + span { background: var(--brass); color: var(--brass-ink); }
+.segmented input:focus-visible + span { outline: 2px solid var(--brass); outline-offset: 2px; }
+
+.loc-manual { display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; align-items: end; }
+.loc-manual label { display: block; margin-bottom: 4px; font-size: 13px; color: var(--dim); }
+.loc-manual > div { min-width: 0; }
+
+.btn {
+  min-height: 46px; padding: 0 18px;
+  background: rgba(146, 164, 255, 0.12);
+  border: 1px solid var(--edge); border-radius: 12px;
+  font-weight: 600;
+}
+.btn--primary { background: var(--brass); border-color: var(--brass); color: var(--brass-ink); font-size: 17px; }
+.btn--quiet { background: none; border-color: transparent; color: var(--dim); }
+
+.credits { margin: 0; padding-top: 14px; border-top: 1px solid var(--edge); font-size: 12px; color: var(--dim); }
+
+/* The tools wait until the welcome screen is dismissed. */
+body.pre-start .bar { display: none; }
+
+/* --- welcome ------------------------------------------------------------ */
+.welcome {
+  position: fixed; inset: 0;
+  display: grid; align-items: end; justify-items: center;
+  padding: calc(var(--inset-top) + 24px) var(--gutter) calc(var(--inset-bottom) + 24px);
+  background: linear-gradient(to top, rgba(7, 11, 26, 0.96) 0%, rgba(7, 11, 26, 0.82) 46%, rgba(7, 11, 26, 0) 100%);
+  overflow-y: auto;
+}
+.welcome__panel { display: flex; flex-direction: column; gap: 14px; width: 100%; max-width: 420px; }
+.welcome h1 { margin: 0; font: 64px/0.95 var(--display); letter-spacing: 0.02em; }
+.welcome__lede { margin: 0; font-size: 18px; line-height: 1.4; text-wrap: balance; }
+.welcome__needs { display: grid; gap: 6px; margin: 0 0 8px; padding: 0; list-style: none; color: var(--dim); }
+.welcome__needs strong { color: var(--starlight); font-weight: 600; }
+@media (min-height: 760px) and (min-width: 700px) {
+  .welcome { align-items: center; background: radial-gradient(ellipse at center, rgba(7, 11, 26, 0.94) 0%, rgba(7, 11, 26, 0.75) 45%, rgba(7, 11, 26, 0.2) 100%); }
+}
+
+/* Hover feedback only where there is a pointer that hovers; on touch screens
+   it would stick to the last button tapped. */
+@media (hover: hover) {
+  .bar button:hover { background: rgba(146, 164, 255, 0.12); }
+  .bar button[aria-pressed="true"]:hover { background: #f0c47c; }
+  .card__close:hover { color: var(--starlight); background: rgba(146, 164, 255, 0.12); }
+  .find-list button:hover { background: rgba(146, 164, 255, 0.07); }
+  .btn:hover { background: rgba(146, 164, 255, 0.2); }
+  .btn--primary:hover { background: #f0c47c; }
+  .btn--quiet:hover { background: none; color: var(--starlight); }
+}
+
+/* --- night vision ------------------------------------------------------- */
+/* Multiplying by pure red drops green and blue from everything beneath,
+   which keeps eyes dark-adapted. */
+#night-filter {
+  position: fixed; inset: 0; z-index: 10;
+  background: #ff2200; mix-blend-mode: multiply;
+  pointer-events: none; display: none;
+}
+body.night #night-filter { display: block; }
